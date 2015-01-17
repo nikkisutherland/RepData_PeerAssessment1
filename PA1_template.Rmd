@@ -1,25 +1,102 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+author: "Nikki Sutherland"
+date: "January 17, 2015"
+output: html_document
+keep_md: true
 ---
 
 
-## Loading and preprocessing the data
+#### Loading and preprocessing the data
+  
+Load the packages to be used for analysis:
+
+```{r warning=FALSE, message=FALSE, echo=TRUE}
+library(plyr)
+library(knitr)
+```
+
+  
+Create a "data" directory and then load the data:
+
+```{r echo=TRUE}
+if (!file.exists("./data")) { dir.create("./data") }
+activity_file <- "activity.zip"
+unzip(activity_file, overwrite = TRUE, list = FALSE, junkpaths = TRUE, exdir = "./data", unzip = "internal", setTimes = FALSE)
+activity_data <- read.csv("./data/activity.csv", colClasses = c("numeric", "character", "numeric"))
+```
+
+
+The activity data looks like this:
+
+```{r echo=TRUE}
+head(activity_data)
+tail(activity_data)
+summary(activity_data)
+```
+
+
+Remove the rows with NA values:
+
+```{r echo=TRUE}
+complete_data <- activity_data[complete.cases(activity_data),]
+```
+
+
+#### What is mean total number of steps taken per day?
+
+Use ddply to get the total steps for each day:
+```{r echo=TRUE}
+total_steps <- ddply(complete_data, .(date), summarize, Total_steps=sum(steps))
+head(total_steps)
+tail(total_steps)
+summary(total_steps)
+```
+
+Create a histogram of the total number of steps taken each day:
+
+```{r echo=TRUE}
+hist(total_steps$Total_steps, main = "Total Steps Taken per Day", xlab = "Total Steps")
+```
+
+Then take the mean and median total number of steps taken per day:
+```{r echo=TRUE, eval=TRUE}
+mean(total_steps$Total_steps)
+median(total_steps$Total_steps)
+```
 
 
 
-## What is mean total number of steps taken per day?
+#### What is the average daily activity pattern?
+
+Use ddply to calculate the average number of steps taken at each interval:
+```{r echo=TRUE}
+average_steps_interval <- ddply(complete_data, .(interval), summarize, Average_steps=mean(steps))
+```
+
+Create a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days:
+```{r echo=TRUE}
+plot(average_steps_interval$interval, average_steps_interval$Average_steps, 
+     type = "l", main = "Average Steps Taken per 5-minute Interval",
+     xlab = "Interval", ylab = "Average Steps Taken")
+```
+
+Determine which 5-minute interval, on average across all the days in the dataset,contains the maximum number of steps:
+```{r echo=TRUE}
+max_steps <- which.max(as.double(average_steps_interval$Average_steps))
+average_steps_interval[max_steps, "interval"]
+```
+
+#### Inputing missing values
 
 
 
-## What is the average daily activity pattern?
+Calculate and report the total number of missing values in the dataset:
 
 
 
-## Imputing missing values
-
+Create a new dataset that is equal to the original dataset but with the
+missing data filled in:
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
