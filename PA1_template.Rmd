@@ -6,8 +6,26 @@ output: html_document
 keep_md: true
 ---
 
+## Introduction
 
-#### Loading and preprocessing the data
+This assignment takes activity data from a personal activity monitoring device 
+and performs some basic analysis on the steps taken per 5-minute interval for 
+a 2-month period.
+
+The variables included in this dataset are:
+
+* **steps**: Number of steps taking in a 5-minute interval (missing values are
+    coded as `NA`)
+
+* **date**: The date on which the measurement was taken in YYYY-MM-DD format
+
+* **interval**: Identifier for the 5-minute interval in which
+    measurement was taken
+    
+The interval is essentially the given time of day. For example, 955 is 9:55 AM
+and 1810 corresponds to 6:10 PM.
+
+### Loading and Preprocessing the Data
   
 Load the packages to be used for analysis:
 
@@ -22,7 +40,8 @@ Create a "data" directory and then load the data:
 ```{r echo=TRUE}
 if (!file.exists("./data")) { dir.create("./data") }
 activity_file <- "activity.zip"
-unzip(activity_file, overwrite = TRUE, list = FALSE, junkpaths = TRUE, exdir = "./data", unzip = "internal", setTimes = FALSE)
+unzip(activity_file, overwrite = TRUE, list = FALSE, junkpaths = TRUE, 
+      exdir = "./data", unzip = "internal", setTimes = FALSE)
 activity_data <- read.csv("./data/activity.csv", colClasses = c("numeric", "character", "numeric"))
 ```
 
@@ -43,7 +62,7 @@ complete_data <- activity_data[complete.cases(activity_data),]
 ```
 
 
-#### What is mean total number of steps taken per day?
+### Mean Total Number of Steps Taken per Day
 
 Use ddply to get the total steps for each day:
 ```{r echo=TRUE}
@@ -55,7 +74,7 @@ summary(total_steps)
 
 Create a histogram of the total number of steps taken each day:
 
-```{r echo=TRUE}
+```{r total_daily_steps, echo=TRUE}
 hist(total_steps$Total_steps, main = "Total Steps Taken per Day", xlab = "Total Steps")
 ```
 
@@ -67,7 +86,7 @@ median(total_steps$Total_steps)
 
 
 
-#### What is the average daily activity pattern?
+### Average Daily Activity Pattern?
 
 Use ddply to calculate the average number of steps taken at each interval:
 ```{r echo=TRUE}
@@ -75,7 +94,7 @@ average_steps_interval <- ddply(complete_data, .(interval), summarize, Average_s
 ```
 
 Create a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days:
-```{r echo=TRUE}
+```{r average_interval_steps, echo=TRUE}
 plot(average_steps_interval$interval, average_steps_interval$Average_steps, 
      type = "l", main = "Average Steps Taken per 5-minute Interval",
      xlab = "Interval", ylab = "Average Steps Taken")
@@ -87,7 +106,7 @@ max_steps <- which.max(as.double(average_steps_interval$Average_steps))
 average_steps_interval[max_steps, "interval"]
 ```
 
-#### Inputing missing values
+### Inputing Missing Values
 
 
 
@@ -99,4 +118,9 @@ Create a new dataset that is equal to the original dataset but with the
 missing data filled in:
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+### Comparing Weekday and Weekend Activity Patterns
+
+
+
+
+

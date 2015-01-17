@@ -6,6 +6,24 @@ output: html_document
 keep_md: true
 ---
 
+## Introduction
+
+This assignment takes activity data from a personal activity monitoring device 
+and performs some basic analysis on the steps taken per 5-minute interval for 
+a 2-month period.
+
+The variables included in this dataset are:
+
+* **steps**: Number of steps taking in a 5-minute interval (missing values are
+    coded as `NA`)
+
+* **date**: The date on which the measurement was taken in YYYY-MM-DD format
+
+* **interval**: Identifier for the 5-minute interval in which
+    measurement was taken
+    
+The interval is essentially the given time of day. For example, 955 is 9:55 AM
+and 1810 corresponds to 6:10 PM.
 
 ### Loading and Preprocessing the Data
   
@@ -24,7 +42,8 @@ Create a "data" directory and then load the data:
 ```r
 if (!file.exists("./data")) { dir.create("./data") }
 activity_file <- "activity.zip"
-unzip(activity_file, overwrite = TRUE, list = FALSE, junkpaths = TRUE, exdir = "./data", unzip = "internal", setTimes = FALSE)
+unzip(activity_file, overwrite = TRUE, list = FALSE, junkpaths = TRUE, 
+      exdir = "./data", unzip = "internal", setTimes = FALSE)
 activity_data <- read.csv("./data/activity.csv", colClasses = c("numeric", "character", "numeric"))
 ```
 
@@ -138,7 +157,7 @@ Create a histogram of the total number of steps taken each day:
 hist(total_steps$Total_steps, main = "Total Steps Taken per Day", xlab = "Total Steps")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+![plot of chunk total_daily_steps](figure/total_daily_steps-1.png) 
 
 Then take the mean and median total number of steps taken per day:
 
@@ -176,7 +195,7 @@ plot(average_steps_interval$interval, average_steps_interval$Average_steps,
      xlab = "Interval", ylab = "Average Steps Taken")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+![plot of chunk average_interval_steps](figure/average_interval_steps-1.png) 
 
 Determine which 5-minute interval, on average across all the days in the dataset,contains the maximum number of steps:
 
