@@ -183,6 +183,45 @@ Use ddply to calculate the average number of steps taken at each interval:
 
 ```r
 average_steps_interval <- ddply(activity_data, .(interval), summarize, Average_steps=mean(steps, na.rm = TRUE))
+head(average_steps_interval)
+```
+
+```
+##   interval Average_steps
+## 1        0     1.7169811
+## 2        5     0.3396226
+## 3       10     0.1320755
+## 4       15     0.1509434
+## 5       20     0.0754717
+## 6       25     2.0943396
+```
+
+```r
+tail(average_steps_interval)
+```
+
+```
+##     interval Average_steps
+## 283     2330     2.6037736
+## 284     2335     4.6981132
+## 285     2340     3.3018868
+## 286     2345     0.6415094
+## 287     2350     0.2264151
+## 288     2355     1.0754717
+```
+
+```r
+summary(average_steps_interval)
+```
+
+```
+##     interval      Average_steps    
+##  Min.   :   0.0   Min.   :  0.000  
+##  1st Qu.: 588.8   1st Qu.:  2.486  
+##  Median :1177.5   Median : 34.113  
+##  Mean   :1177.5   Mean   : 37.383  
+##  3rd Qu.:1766.2   3rd Qu.: 52.835  
+##  Max.   :2355.0   Max.   :206.170
 ```
 
 Create a time series plot of the 5-minute interval and the average number of 
@@ -227,9 +266,99 @@ number_nas
 
 There are 2,304 observations for steps that have NA values.  
 
-Using the average step value for the missing intervals, create a new dataset
-that is equal to the original dataset but with the missing data filled in:
+To create a more complete data set, the average step value from the **average_steps_interval** 
+data frame will replace an NA value for the corresponding interval. For example,
+the first observation in the data set, on 2012-10-01, at interval 0 is NA:
 
+```r
+head(activity_data, n=1)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+```
+
+It will be replaced with the average number of steps taken at that interval:
+
+```r
+head(average_steps_interval, n=1)
+```
+
+```
+##   interval Average_steps
+## 1        0      1.716981
+```
+
+Start by making a copy of the **activity_data** data frame:
+
+```r
+complete_data <- activity_data
+```
+
+Replace the NA values in **nas** data frame:
+
+```r
+for (i in 1:number_nas) {
+    nas[i, "steps"] <- average_steps_interval[which(average_steps_interval$interval == nas[i, "interval"]), "Average_steps"]
+}
+head(nas)
+```
+
+```
+##       steps       date interval
+## 1 1.7169811 2012-10-01        0
+## 2 0.3396226 2012-10-01        5
+## 3 0.1320755 2012-10-01       10
+## 4 0.1509434 2012-10-01       15
+## 5 0.0754717 2012-10-01       20
+## 6 2.0943396 2012-10-01       25
+```
+
+```r
+tail(nas)
+```
+
+```
+##           steps       date interval
+## 17563 2.6037736 2012-11-30     2330
+## 17564 4.6981132 2012-11-30     2335
+## 17565 3.3018868 2012-11-30     2340
+## 17566 0.6415094 2012-11-30     2345
+## 17567 0.2264151 2012-11-30     2350
+## 17568 1.0754717 2012-11-30     2355
+```
+
+Replace the specific row numbers in **complete_data** with the corresponding
+row numbers from the **nas** data frame:
+
+```r
+replacement_rows <- as.numeric(row.names(nas))
+for (i in replacement_rows) {
+    complete_data[i, ] <- nas[which(row.names(nas)==as.character(i)), ]
+}
+```
+
+Use ddply to get the total steps for each day, using the new complete data:
+
+```r
+total_steps_complete <- ddply(complete_data, .(date), summarize, Total_steps=sum(steps, na.rm = TRUE))
+```
+
+Create a new histogram of the total number of steps taken each day:
+
+```r
+hist(total_steps_complete$Total_steps, main = "Total Steps Taken per Day\n(NA values replaced by average values)", xlab = "Total Steps")
+```
+
+![plot of chunk total_daily_steps_complete](figure/total_daily_steps_complete-1.png) 
+
+Then take the new mean and median total number of steps taken per day:
+
+```r
+mean_daily_steps_complete <- mean(total_steps_complete$Total_steps)
+median_daily_steps_complete <- median(total_steps_complete$Total_steps)
+```
 
 ### Comparing Weekday and Weekend Activity Patterns
 

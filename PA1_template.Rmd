@@ -88,8 +88,11 @@ median(total_steps$Total_steps)
 ### Average Daily Activity Pattern
 
 Use ddply to calculate the average number of steps taken at each interval:
-```{r echo=TRUE}
+```{r echo=TRUE, eval=TRUE}
 average_steps_interval <- ddply(activity_data, .(interval), summarize, Average_steps=mean(steps, na.rm = TRUE))
+head(average_steps_interval)
+tail(average_steps_interval)
+summary(average_steps_interval)
 ```
 
 Create a time series plot of the 5-minute interval and the average number of 
@@ -121,9 +124,56 @@ number_nas
 
 There are 2,304 observations for steps that have NA values.  
 
-Using the average step value for the missing intervals, create a new dataset
-that is equal to the original dataset but with the missing data filled in:
+To create a more complete data set, the average step value from the **average_steps_interval** 
+data frame will replace an NA value for the corresponding interval. For example,
+the first observation in the data set, on 2012-10-01, at interval 0 is NA:
+```{r echo=TRUE, eval=TRUE}
+head(activity_data, n=1)
+```
 
+It will be replaced with the average number of steps taken at that interval:
+```{r echo=TRUE, eval=TRUE}
+head(average_steps_interval, n=1)
+```
+
+Start by making a copy of the **activity_data** data frame:
+```{r echo=TRUE, eval=TRUE}
+complete_data <- activity_data
+```
+
+Replace the NA values in **nas** data frame:
+```{r echo=TRUE, eval=TRUE}
+for (i in 1:number_nas) {
+    nas[i, "steps"] <- average_steps_interval[which(average_steps_interval$interval == nas[i, "interval"]), "Average_steps"]
+}
+head(nas)
+tail(nas)
+```
+
+Replace the specific row numbers in **complete_data** with the corresponding
+row numbers from the **nas** data frame:
+```{r echo=TRUE, eval=TRUE}
+replacement_rows <- as.numeric(row.names(nas))
+for (i in replacement_rows) {
+    complete_data[i, ] <- nas[which(row.names(nas)==as.character(i)), ]
+}
+```
+
+Use ddply to get the total steps for each day, using the new complete data:
+```{r echo=TRUE, eval=TRUE}
+total_steps_complete <- ddply(complete_data, .(date), summarize, Total_steps=sum(steps, na.rm = TRUE))
+```
+
+Create a new histogram of the total number of steps taken each day:
+```{r total_daily_steps_complete, echo=TRUE, eval=TRUE}
+hist(total_steps_complete$Total_steps, main = "Total Steps Taken per Day\n(NA values replaced by average values)", xlab = "Total Steps")
+```
+
+Then take the new mean and median total number of steps taken per day:
+```{r echo=TRUE, eval=TRUE}
+mean_daily_steps_complete <- mean(total_steps_complete$Total_steps)
+median_daily_steps_complete <- median(total_steps_complete$Total_steps)
+```
 
 ### Comparing Weekday and Weekend Activity Patterns
 
