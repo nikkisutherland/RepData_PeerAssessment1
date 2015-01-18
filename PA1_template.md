@@ -40,6 +40,7 @@ Load the packages to be used for analysis:
 ```r
 library(plyr)
 library(knitr)
+library(ggplot2)
 ```
 
   
@@ -107,7 +108,8 @@ summary(activity_data)
 Use ddply to get the total steps for each day:
 
 ```r
-total_steps <- ddply(activity_data, .(date), summarize, Total_steps=sum(steps, na.rm = TRUE))
+total_steps <- ddply(activity_data, .(date), summarize,
+                     Total_steps=sum(steps, na.rm = TRUE))
 head(total_steps)
 ```
 
@@ -153,7 +155,9 @@ Create a histogram of the total number of steps taken each day:
 
 
 ```r
-hist(total_steps$Total_steps, main = "Total Steps Taken per Day", xlab = "Total Steps")
+hist(total_steps$Total_steps, 
+     main = "Total Steps Taken per Day", 
+     xlab = "Total Steps")
 ```
 
 ![plot of chunk total_daily_steps](figure/total_daily_steps-1.png) 
@@ -182,7 +186,8 @@ median(total_steps$Total_steps)
 Use ddply to calculate the average number of steps taken at each interval:
 
 ```r
-average_steps_interval <- ddply(activity_data, .(interval), summarize, Average_steps=mean(steps, na.rm = TRUE))
+average_steps_interval <- ddply(activity_data, .(interval), summarize,
+                                Average_steps=mean(steps, na.rm = TRUE))
 head(average_steps_interval)
 ```
 
@@ -342,13 +347,16 @@ for (i in replacement_rows) {
 Use ddply to get the total steps for each day, using the new complete data:
 
 ```r
-total_steps_complete <- ddply(complete_data, .(date), summarize, Total_steps=sum(steps, na.rm = TRUE))
+total_steps_complete <- ddply(complete_data, .(date), summarize, 
+                              Total_steps=sum(steps, na.rm = TRUE))
 ```
 
 Create a new histogram of the total number of steps taken each day:
 
 ```r
-hist(total_steps_complete$Total_steps, main = "Total Steps Taken per Day\n(NA values replaced by average values)", xlab = "Total Steps")
+hist(total_steps_complete$Total_steps, 
+     main = "Total Steps Taken per Day\n(NA values replaced by average values)", 
+     xlab = "Total Steps")
 ```
 
 ![plot of chunk total_daily_steps_complete](figure/total_daily_steps_complete-1.png) 
@@ -356,13 +364,63 @@ hist(total_steps_complete$Total_steps, main = "Total Steps Taken per Day\n(NA va
 Then take the new mean and median total number of steps taken per day:
 
 ```r
-mean_daily_steps_complete <- mean(total_steps_complete$Total_steps)
-median_daily_steps_complete <- median(total_steps_complete$Total_steps)
+mean(total_steps_complete$Total_steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+median(total_steps_complete$Total_steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 ### Comparing Weekday and Weekend Activity Patterns
 
+Start by getting the number of days in the experiment:
 
+```r
+num_days <- nrow(total_steps_complete)
+```
 
+Then loop through the days and calculate which days were weekends (Saturday and Sunday):
 
+```r
+weekends <- data.frame()
 
+for (i in 1:num_days) {    
+    if ((weekdays(as.Date(total_steps_complete[i, "date"])) %in% c('Saturday','Sunday'))) {
+        weekends <- rbind(weekends, as.data.frame(total_steps_complete[i, "date"]))
+    }   
+}
+
+colnames(weekends)[1] <- "date"
+```
+
+Then create a factor for weekdays and weekends. Add this column to the
+**complete_data** data frame and set all the days to weekdays, since only a
+few days are actually weekends:
+
+```r
+day_type <- factor(c("weekday", "weekend"))
+names(day_type) <- c("weekday", "weekend")
+
+nobs <- nrow(complete_data)
+day <- rep(day_type[1], nobs)
+complete_data <- cbind(complete_data, day)
+```
+
+Then, update the **complete_data** data frame with the dates that are known weekends:
+
+```r
+num_weekends <- nrow(weekends)
+for (i in 1:num_weekends) {
+    selections <- row.names(complete_data[complete_data$date == as.character(weekends[1, "date"]), ])
+    complete_data[selections, "day"] <- "weekend"
+
+}
+```
