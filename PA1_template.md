@@ -1,10 +1,17 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
+title: 'Reproducible Research: Peer Assessment 1'
 author: "Nikki Sutherland"
 date: "January 17, 2015"
-output: html_document
-keep_md: true
+output:
+  html_document:
+    keep_md: yes
 ---
+
+Reproducible Research: Peer Assessment 1
+========================================
+
+**Author:** Nikki Sutherland  
+**Date:** January 17, 2015
 
 ## Introduction
 
@@ -95,31 +102,23 @@ summary(activity_data)
 ```
 
 
-Remove the rows with NA values:
-
-
-```r
-complete_data <- activity_data[complete.cases(activity_data),]
-```
-
-
 ### Mean Total Number of Steps Taken per Day
 
 Use ddply to get the total steps for each day:
 
 ```r
-total_steps <- ddply(complete_data, .(date), summarize, Total_steps=sum(steps))
+total_steps <- ddply(activity_data, .(date), summarize, Total_steps=sum(steps, na.rm = TRUE))
 head(total_steps)
 ```
 
 ```
 ##         date Total_steps
-## 1 2012-10-02         126
-## 2 2012-10-03       11352
-## 3 2012-10-04       12116
-## 4 2012-10-05       13294
-## 5 2012-10-06       15420
-## 6 2012-10-07       11015
+## 1 2012-10-01           0
+## 2 2012-10-02         126
+## 3 2012-10-03       11352
+## 4 2012-10-04       12116
+## 5 2012-10-05       13294
+## 6 2012-10-06       15420
 ```
 
 ```r
@@ -128,12 +127,12 @@ tail(total_steps)
 
 ```
 ##          date Total_steps
-## 48 2012-11-24       14478
-## 49 2012-11-25       11834
-## 50 2012-11-26       11162
-## 51 2012-11-27       13646
-## 52 2012-11-28       10183
-## 53 2012-11-29        7047
+## 56 2012-11-25       11834
+## 57 2012-11-26       11162
+## 58 2012-11-27       13646
+## 59 2012-11-28       10183
+## 60 2012-11-29        7047
+## 61 2012-11-30           0
 ```
 
 ```r
@@ -142,11 +141,11 @@ summary(total_steps)
 
 ```
 ##      date            Total_steps   
-##  Length:53          Min.   :   41  
-##  Class :character   1st Qu.: 8841  
-##  Mode  :character   Median :10765  
-##                     Mean   :10766  
-##                     3rd Qu.:13294  
+##  Length:61          Min.   :    0  
+##  Class :character   1st Qu.: 6778  
+##  Mode  :character   Median :10395  
+##                     Mean   : 9354  
+##                     3rd Qu.:12811  
 ##                     Max.   :21194
 ```
 
@@ -166,7 +165,7 @@ mean(total_steps$Total_steps)
 ```
 
 ```
-## [1] 10766.19
+## [1] 9354.23
 ```
 
 ```r
@@ -174,20 +173,20 @@ median(total_steps$Total_steps)
 ```
 
 ```
-## [1] 10765
+## [1] 10395
 ```
 
 
-
-### Average Daily Activity Pattern?
+### Average Daily Activity Pattern
 
 Use ddply to calculate the average number of steps taken at each interval:
 
 ```r
-average_steps_interval <- ddply(complete_data, .(interval), summarize, Average_steps=mean(steps))
+average_steps_interval <- ddply(activity_data, .(interval), summarize, Average_steps=mean(steps, na.rm = TRUE))
 ```
 
-Create a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days:
+Create a time series plot of the 5-minute interval and the average number of 
+steps taken, averaged across all days:
 
 ```r
 plot(average_steps_interval$interval, average_steps_interval$Average_steps, 
@@ -197,7 +196,8 @@ plot(average_steps_interval$interval, average_steps_interval$Average_steps,
 
 ![plot of chunk average_interval_steps](figure/average_interval_steps-1.png) 
 
-Determine which 5-minute interval, on average across all the days in the dataset,contains the maximum number of steps:
+Determine which 5-minute interval, on average across all the days in the 
+dataset,contains the maximum number of steps:
 
 ```r
 max_steps <- which.max(as.double(average_steps_interval$Average_steps))
@@ -208,16 +208,27 @@ average_steps_interval[max_steps, "interval"]
 ## [1] 835
 ```
 
+So, on average, 8:35 AM has the most steps taken.
+
 ### Inputing Missing Values
-
-
 
 Calculate and report the total number of missing values in the dataset:
 
 
+```r
+nas <- activity_data[is.na(activity_data$steps),]
+number_nas <- nrow(nas)
+number_nas
+```
 
-Create a new dataset that is equal to the original dataset but with the
-missing data filled in:
+```
+## [1] 2304
+```
+
+There are 2,304 observations for steps that have NA values.  
+
+Using the average step value for the missing intervals, create a new dataset
+that is equal to the original dataset but with the missing data filled in:
 
 
 ### Comparing Weekday and Weekend Activity Patterns

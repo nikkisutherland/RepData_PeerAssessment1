@@ -1,10 +1,17 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
+title: 'Reproducible Research: Peer Assessment 1'
 author: "Nikki Sutherland"
 date: "January 17, 2015"
-output: html_document
-keep_md: true
+output:
+  html_document:
+    keep_md: yes
 ---
+
+Reproducible Research: Peer Assessment 1
+========================================
+
+**Author:** Nikki Sutherland  
+**Date:** January 17, 2015
 
 ## Introduction
 
@@ -48,25 +55,18 @@ activity_data <- read.csv("./data/activity.csv", colClasses = c("numeric", "char
 
 The activity data looks like this:
 
-```{r echo=TRUE}
+```{r echo=TRUE, eval=TRUE}
 head(activity_data)
 tail(activity_data)
 summary(activity_data)
 ```
 
 
-Remove the rows with NA values:
-
-```{r echo=TRUE}
-complete_data <- activity_data[complete.cases(activity_data),]
-```
-
-
 ### Mean Total Number of Steps Taken per Day
 
 Use ddply to get the total steps for each day:
-```{r echo=TRUE}
-total_steps <- ddply(complete_data, .(date), summarize, Total_steps=sum(steps))
+```{r echo=TRUE, eval=TRUE}
+total_steps <- ddply(activity_data, .(date), summarize, Total_steps=sum(steps, na.rm = TRUE))
 head(total_steps)
 tail(total_steps)
 summary(total_steps)
@@ -74,7 +74,7 @@ summary(total_steps)
 
 Create a histogram of the total number of steps taken each day:
 
-```{r total_daily_steps, echo=TRUE}
+```{r total_daily_steps, echo=TRUE, eval=TRUE}
 hist(total_steps$Total_steps, main = "Total Steps Taken per Day", xlab = "Total Steps")
 ```
 
@@ -85,37 +85,44 @@ median(total_steps$Total_steps)
 ```
 
 
-
-### Average Daily Activity Pattern?
+### Average Daily Activity Pattern
 
 Use ddply to calculate the average number of steps taken at each interval:
 ```{r echo=TRUE}
-average_steps_interval <- ddply(complete_data, .(interval), summarize, Average_steps=mean(steps))
+average_steps_interval <- ddply(activity_data, .(interval), summarize, Average_steps=mean(steps, na.rm = TRUE))
 ```
 
-Create a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days:
-```{r average_interval_steps, echo=TRUE}
+Create a time series plot of the 5-minute interval and the average number of 
+steps taken, averaged across all days:
+```{r average_interval_steps, echo=TRUE, eval=TRUE}
 plot(average_steps_interval$interval, average_steps_interval$Average_steps, 
      type = "l", main = "Average Steps Taken per 5-minute Interval",
      xlab = "Interval", ylab = "Average Steps Taken")
 ```
 
-Determine which 5-minute interval, on average across all the days in the dataset,contains the maximum number of steps:
-```{r echo=TRUE}
+Determine which 5-minute interval, on average across all the days in the 
+dataset,contains the maximum number of steps:
+```{r echo=TRUE, eval=TRUE}
 max_steps <- which.max(as.double(average_steps_interval$Average_steps))
 average_steps_interval[max_steps, "interval"]
 ```
 
+So, on average, 8:35 AM has the most steps taken.
+
 ### Inputing Missing Values
-
-
 
 Calculate and report the total number of missing values in the dataset:
 
+```{r echo=TRUE, eval=TRUE}
+nas <- activity_data[is.na(activity_data$steps),]
+number_nas <- nrow(nas)
+number_nas
+```
 
+There are 2,304 observations for steps that have NA values.  
 
-Create a new dataset that is equal to the original dataset but with the
-missing data filled in:
+Using the average step value for the missing intervals, create a new dataset
+that is equal to the original dataset but with the missing data filled in:
 
 
 ### Comparing Weekday and Weekend Activity Patterns
