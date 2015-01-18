@@ -387,40 +387,38 @@ Start by getting the number of days in the experiment:
 num_days <- nrow(total_steps_complete)
 ```
 
-Then loop through the days and calculate which days were weekends (Saturday and Sunday):
-
-```r
-weekends <- data.frame()
-
-for (i in 1:num_days) {    
-    if ((weekdays(as.Date(total_steps_complete[i, "date"])) %in% c('Saturday','Sunday'))) {
-        weekends <- rbind(weekends, as.data.frame(total_steps_complete[i, "date"]))
-    }   
-}
-
-colnames(weekends)[1] <- "date"
-```
-
 Then create a factor for weekdays and weekends. Add this column to the
-**complete_data** data frame and set all the days to weekdays, since only a
-few days are actually weekends:
+**total_steps_complete** data frame and set all the days to weekdays, 
+since only a few days are actually weekends:
 
 ```r
 day_type <- factor(c("weekday", "weekend"))
 names(day_type) <- c("weekday", "weekend")
+day <- rep(day_type[1], num_days)
 
-nobs <- nrow(complete_data)
-day <- rep(day_type[1], nobs)
-complete_data <- cbind(complete_data, day)
+total_steps_complete <- cbind(total_steps_complete, day)
 ```
 
-Then, update the **complete_data** data frame with the dates that are known weekends:
+Then loop through the days and calculate which days were weekends (Saturday and Sunday):
 
 ```r
-num_weekends <- nrow(weekends)
-for (i in 1:num_weekends) {
-    selections <- row.names(complete_data[complete_data$date == as.character(weekends[1, "date"]), ])
-    complete_data[selections, "day"] <- "weekend"
-
+for (i in 1:num_days) {    
+    if ((weekdays(as.Date(total_steps_complete[i, "date"])) %in% c('Saturday','Sunday'))) {
+        total_steps_complete[i, "day"] <- "weekend"
+    }   
 }
+summary(total_steps_complete)
 ```
+
+```
+##      date            Total_steps         day    
+##  Length:61          Min.   :   41   weekday:45  
+##  Class :character   1st Qu.: 9819   weekend:16  
+##  Mode  :character   Median :10766               
+##                     Mean   :10766               
+##                     3rd Qu.:12811               
+##                     Max.   :21194
+```
+
+
+

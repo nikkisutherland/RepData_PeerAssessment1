@@ -524,39 +524,34 @@ for (i in replacement_rows) {
 <pre><code class="r">num_days &lt;- nrow(total_steps_complete)
 </code></pre>
 
-<p>Then loop through the days and calculate which days were weekends (Saturday and Sunday):</p>
-
-<pre><code class="r">weekends &lt;- data.frame()
-
-for (i in 1:num_days) {    
-    if ((weekdays(as.Date(total_steps_complete[i, &quot;date&quot;])) %in% c(&#39;Saturday&#39;,&#39;Sunday&#39;))) {
-        weekends &lt;- rbind(weekends, as.data.frame(total_steps_complete[i, &quot;date&quot;]))
-    }   
-}
-
-colnames(weekends)[1] &lt;- &quot;date&quot;
-</code></pre>
-
 <p>Then create a factor for weekdays and weekends. Add this column to the
-<strong>complete_data</strong> data frame and set all the days to weekdays, since only a
-few days are actually weekends:</p>
+<strong>total_steps_complete</strong> data frame and set all the days to weekdays, 
+since only a few days are actually weekends:</p>
 
 <pre><code class="r">day_type &lt;- factor(c(&quot;weekday&quot;, &quot;weekend&quot;))
 names(day_type) &lt;- c(&quot;weekday&quot;, &quot;weekend&quot;)
+day &lt;- rep(day_type[1], num_days)
 
-nobs &lt;- nrow(complete_data)
-day &lt;- rep(day_type[1], nobs)
-complete_data &lt;- cbind(complete_data, day)
+total_steps_complete &lt;- cbind(total_steps_complete, day)
 </code></pre>
 
-<p>Then, update the <strong>complete_data</strong> data frame with the dates that are known weekends:</p>
+<p>Then loop through the days and calculate which days were weekends (Saturday and Sunday):</p>
 
-<pre><code class="r">num_weekends &lt;- nrow(weekends)
-for (i in 1:num_weekends) {
-    selections &lt;- row.names(complete_data[complete_data$date == as.character(weekends[1, &quot;date&quot;]), ])
-    complete_data[selections, &quot;day&quot;] &lt;- &quot;weekend&quot;
-
+<pre><code class="r">for (i in 1:num_days) {    
+    if ((weekdays(as.Date(total_steps_complete[i, &quot;date&quot;])) %in% c(&#39;Saturday&#39;,&#39;Sunday&#39;))) {
+        total_steps_complete[i, &quot;day&quot;] &lt;- &quot;weekend&quot;
+    }   
 }
+summary(total_steps_complete)
+</code></pre>
+
+<pre><code>##      date            Total_steps         day    
+##  Length:61          Min.   :   41   weekday:45  
+##  Class :character   1st Qu.: 9819   weekend:16  
+##  Mode  :character   Median :10766               
+##                     Mean   :10766               
+##                     3rd Qu.:12811               
+##                     Max.   :21194
 </code></pre>
 
 </body>
